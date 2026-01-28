@@ -1,25 +1,38 @@
-# Prompt-de-Proyectos
-🚀 Prompt Maestro para futuros Backends SaaS Modulares
-Copia y guarda este prompt. Está diseñado para que cualquier IA entienda tu Principio Rector y las restricciones técnicas de tu stack.
+# para ejecutar el FastAPI
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-Prompt: "Actúa como un experto en arquitectura de software. Necesito construir un nuevo módulo/backend siguiendo una infraestructura SaaS Modular.
+##🧩 FASE 1 – Análisis del diseño (aquí SÍ pegas el HTML)
 
-Stack Técnico: > - Framework: FastAPI (Python 3.12+).
+👉 Conversación A (análisis)
+Aquí yo soy tu analista de dominio.
 
-DB: PostgreSQL (Neon) con SQLAlchemy 2.0 y asyncpg.
+Prompt que usas:
 
-Estructura: Basada en carpetas por dominio (app/modules/nombre_modulo).
+Actúa como analista de producto y backend.
 
-Tooling: Optimizado para Linux y pnpm para el frontend acompañante.
+Analiza el siguiente HTML (vista ya aprobada por el cliente).
 
-Reglas Estrictas:
+Tareas:
+1. Identificar entidades del dominio
+2. Identificar estados y acciones
+3. Proponer el contrato API mínimo necesario
+4. No generar código
+5. No asumir lógica no visible en la UI
 
-Multi-tenant: El diseño debe permitir separar datos por tenant_id.
+HTML:
+[PEGAS EL HTML]
 
-Seguridad: Autenticación basada en cookies httpOnly, configuración dinámica de CORS y manejo de SSL explícito para asyncpg (usando ssl.create_default_context).
+🎯 Output:
 
-Modularidad: El módulo debe ser independiente, con su propio router.py, service.py, models.py y schemas.py.
+entidades
 
-Eficiencia: Menos infraestructura, más valor. Prioriza rapidez de iteración y despliegue continuo.
+campos
 
-Tarea: [Describe aquí el nuevo módulo, ej: 'Sistema de gestión de inventario para talleres']. Genera la estructura de archivos y el código base asegurando la conexión asíncrona robusta."
+endpoints
+
+flujos
+
+Este output es texto estructurado, no código.
