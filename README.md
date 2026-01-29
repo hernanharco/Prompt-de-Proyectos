@@ -1,97 +1,106 @@
-# 🎬 Simulación real: ChatGPT → Windsurf
+Manual Completo del Proyecto Windsurf – FastAPI Multi-Tenant (2026, Actualizado y Definitivo, Impecable)
 
-## ACTO 0 – Estado inicial
+🏁 ACTO 0 – Estado inicial
 
-Tú tienes:
+Tienes:
 
-El HTML aprobado por el cliente
+HTML aprobado por el cliente
 
-Tu manual
+Manual original
 
-Un proyecto vacío en Windsurf (o repo recién creado)
+Proyecto vacío en Windsurf o repo recién creado
 
-No hay backend aún. No hay FastAPI. Solo intención.
-____________
-## ACTO 1 – Conversación A en ChatGPT
+Sin backend todavía, solo intención
 
-(Análisis del HTML)
+Mejoras añadidas:
 
-👉 Qué haces tú
+⚠️ Activar entorno virtual manualmente antes de uvicorn
+Preparado para hot reload y Pydantic v2
+Auditoría y multi-tenant reforzados
+JWT seguro con expiración y roles
+Logging con tenant_id y request_id
+Configuración Pydantic v2 con validación de asignación
+Observabilidad mejorada (latencia DB y HTTP opcional)
 
-1. Abres una conversación nueva en ChatGPT
+🧱 ACTO 1 – Conversación A en ChatGPT (Análisis del HTML)
 
-2. Pegas solo esto:
-```text
-Actúa como analista de producto y backend.
+Qué hacer:
 
-Analiza el siguiente HTML (vista ya aprobada por el cliente).
+Abrir una conversación nueva en ChatGPT
 
+Pegar:
+
+Actúa como analista de producto y backend. Analiza el siguiente HTML (vista aprobada).  
 Tareas:
 1. Identificar entidades del dominio
 2. Identificar estados y acciones
 3. Proponer el contrato API mínimo necesario
 4. No generar código
 5. No asumir lógica no visible en la UI
-```
-HTML:
-[PEGAS EL HTML]
-_________
-🧠 Qué hace ChatGPT
-Analiza la UI y responde con algo parecido a:
-```text
+
+
+HTML: [PEGAS EL HTML]
+
+Salida esperada:
+
 ENTIDADES
-- Appointment
-- Customer
-- Service
-- User (staff/admin)
+
+Appointment
+
+Customer
+
+Service
+
+User (staff/admin)
 
 APPOINTMENT
-- id
-- customer_id
-- service_id
-- start_time
-- end_time
-- status
-- price
-- notes
+
+id
+
+customer_id
+
+service_id
+
+start_time
+
+end_time
+
+status
+
+price
+
+notes
 
 ESTADOS
-- pending
-- confirmed
-- cancelled
+
+pending
+
+confirmed
+
+cancelled
 
 ENDPOINTS
-- GET /appointments?date=
-- POST /appointments
-- PATCH /appointments/{id}/confirm
-- PATCH /appointments/{id}/cancel
-```
-👉 Esto NO es código.
-👉 Lo copias y lo guardas.
 
-🎯 Fin del Acto 1
-____
-## 🧱 ACTO 2 – Conversación B en ChatGPT
-(Scaffolding)
+GET /appointments?date=
 
-👉 Qué haces tú
+POST /appointments
 
-1. Abres otra conversación nueva
+PATCH /appointments/{id}/confirm
 
-2. Pegas:
-```text
-Usa estrictamente las siguientes reglas:
+PATCH /appointments/{id}/cancel
 
-Actúa como un Lead Software Engineer experto en FastAPI, arquitecturas multi-tenant y sistemas backend orientados a producto.
+Guardar este output; no es código.
 
-Objetivo:
-Construir un backend modular y escalable siguiendo el principio:
-“Menos infraestructura, más valor entregado”.
+🧱 ACTO 2 – Conversación B en ChatGPT (Scaffolding)
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ARQUITECTURA OBLIGATORIA
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Estructura estricta e innegociable:
+Prompt maestro:
+
+Actúa como Lead Software Engineer experto en FastAPI, arquitecturas multi-tenant y sistemas backend orientados a producto.
+
+
+Objetivo: backend modular y escalable. “Menos infraestructura, más valor entregado”.
+
+ARQUITECTURA:
 
 app/
 ├── main.py
@@ -103,48 +112,42 @@ app/
 │   ├── models.py
 │   └── router.py
 
-No crees carpetas adicionales fuera de esta estructura.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-STACK
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- Python 3.12+
-- FastAPI
-- SQLAlchemy 2.0 async
-- asyncpg
-- Pydantic v2
+No crear carpetas adicionales.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-MULTI-TENANCY (CRÍTICO)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- Todas las tablas heredan de una base con tenant_id obligatorio.
-- Toda query debe filtrar por tenant_id.
-- tenant_id se obtiene del contexto de request.
-- Está prohibido ejecutar queries sin aislamiento de tenant.
-- Middleware tenant:
-  - Extrae tenant del token o headers.
-  - Coloca tenant_id en request.state.tenant_id.
+STACK:
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DB & SSL (NEON)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
--Crear engine con create_async_engine usando:
+Python 3.12+
 
-connect_args={"ssl": ssl_context}
+FastAPI
 
+SQLAlchemy 2.0 async
 
-ssl_context con:
+asyncpg
 
-ssl.create_default_context()
-ssl_context.check_hostname = False
-ssl_context.verify_mode = ssl.CERT_NONE
+Pydantic v2
 
+PyJWT (JWT support)
 
-La URL de conexión se carga desde .env (DATABASE_URL)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-COOKIES & CONFIG via .env
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-.env define:
+MULTI-TENANCY:
+
+Todas tablas con tenant_id obligatorio
+
+Toda query filtra por tenant_id
+
+tenant_id desde request.state.tenant_id
+
+Middleware tenant: extrae tenant de token o headers
+
+DB & SSL:
+
+create_async_engine con connect_args={"ssl": ssl_context}
+
+ssl_context: ssl.create_default_context(), check_hostname=False, verify_mode=ssl.CERT_NONE
+
+URL desde .env DATABASE_URL
+
+CONFIG & COOKIES (.env):
 
 COOKIE_SECURE=false
 COOKIE_SAMESITE=lax
@@ -153,175 +156,141 @@ PORT=8000
 CORS_ORIGINS=http://localhost:3000,https://vercel.app
 
 
-El backend debe leer estas variables automáticamente y aplicarlas.
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SEGURIDAD & CORS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- Auth con cookies httpOnly
-- CORS dinámico (localhost + Vercel)
-- credentials=True
+⚡ Mejoras Pydantic v2: extra = "ignore", validate_assignment = True
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-OBSERVABILIDAD
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- Endpoint GET /health
+SEGURIDAD & CORS:
 
-  - Ejecuta SELECT 1
+Auth con cookies httpOnly
 
-   - Mide latencia DB
+CORS dinámico
 
-- Logging básico con tenant_id por request
+credentials=True
 
-- Mostrar al iniciar: URL docs + URL health
+JWT con expiración corta (ej: 30 minutos)
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-REGLAS GENERALES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- Código async y tipado
-- Sin lógica de negocio en routers
-- Sin texto explicativo innecesario
-- Prioriza claridad y mantenibilidad
+Roles SaaS: owner, admin, staff
 
+OBSERVABILIDAD:
 
-Usa este contrato de dominio ya validado:
-[PEGAS EL OUTPUT DE FASE 1]
-Usa estrictamente la arquitectura y reglas ya definidas.
+GET /health: SELECT 1 + latencia DB
 
-Genera un nuevo módulo backend siguiendo el patrón estándar del proyecto.
+Logging con tenant_id y request_id
 
-Input:
-- Nombre del módulo
-- Entidad principal
-- Campos
-- Operaciones
+Mostrar al iniciar URL /docs y /health
 
-Output:
-- Router del módulo
-- Modelos SQLAlchemy con tenant_id
-- Schemas Pydantic
-- Lógica necesaria
-- Actualización de app/db/models.py
-- Actualización de app/db/router.py
-- Filtro tenant obligatorio en todas las queries
+REGLAS:
 
-No inventes infraestructura nueva.
-No omitas el filtro tenant_id.
+Código async y tipado
 
-Usa OVERLAY – SaaS B2B (Base)
+Sin lógica de negocio en routers
 
-- El sistema es multi-tenant por organización (tenant)
-- Todo dato pertenece a una organización
-- Los usuarios pertenecen a una organización
-- Roles soportados:
-  - owner
-  - admin
-  - staff
-- El owner puede gestionar usuarios
-- El sistema debe permitir auditoría futura (created_at, updated_at)
-- El diseño debe ser compatible con billing futuro
-- No asumir lógica enterprise innecesaria
+Auditoría futura: created_at, updated_at
 
-Genera el prompt de scaffolding definitivo para crear el backend en Windsurf.
-No generes código todavía.
-```
-Extra:
+Compatible con billing
 
-Cuando se arranca con:
+MEJORAS POR Pydantic v2 Y HOT RELOAD:
 
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+En schemas: regex → pattern en Field
 
+En models: __table_args__ = {"extend_existing": True}
 
-Debe mostrar la dirección IP de la app, URL de /docs y /health.
-_____
+Evitar imports circulares router → service → models
 
-## ⚙️ ACTO 3 – Windsurf
+Crear primero models.py → schemas.py → router.py
 
-(Creación real del proyecto)
+En Settings: extra = "ignore" y validate_assignment = True
 
-👉 Qué haces tú en Windsurf
+JWT: instalar PyJWT y usar en security.py
 
-Abres Windsurf
+Metadata global SQLAlchemy para evitar conflictos
 
-Abres el proyecto vacío
+Logs seguros: no imprimir tokens completos
 
-En el chat de Windsurf pegas solo esto:
+⚠️ Activar entorno virtual manual antes de uvicorn
 
-```text
-[PEGAS EL PROMPT DE SCAFFOLDING GENERADO EN EL ACTO 2]
-```
-⏳ Esperas…
-_____
-🤖 Qué hace Windsurf
+🧱 ACTO 3 – Windsurf (Creación del proyecto)
 
-- Crea la estructura app/
+Qué hacer:
 
-- Genera:
+Abrir Windsurf con proyecto vacío
+Pegar prompt de Acto 2
+Esperar
 
-  - main.py
+Resultado:
 
-  - core/config.py
+Estructura app/ creada
 
-  - db/models.py
+Async engine configurado
 
-  - db/router.py
+Multi-tenant implementado
 
-- Prepara async engine
+Healthcheck, logging y CORS listos
 
-- Configura multi-tenant
+No endpoints de dominio aún
 
-- No inventa endpoints
+🎯 Proyecto base listo
 
-🎯 Proyecto base creado
-_____________
-ACTO 4 – Input mínimo (crear un módulo)
+🧱 ACTO 4 – Crear un módulo mínimo
 
-👉 Qué haces tú
+Qué hacer:
 
-En el mismo chat de Windsurf, pegas ahora:
-```text
 MÓDULO: Gestión de Citas
-
 ENTIDAD PRINCIPAL: Appointment
 
 CAMPOS:
-- service_id
-- customer_id
-- start_time
-- end_time
-- duration_minutes
-- price
-- notes
-- status
+
+service_id
+
+customer_id
+
+start_time
+
+end_time
+
+duration_minutes
+
+price
+
+notes
+
+status
+
+tenant_id
+
+created_at / updated_at
 
 OPERACIONES:
-- Listar citas por fecha
-- Crear cita
-- Confirmar cita
-- Cancelar cita
 
-Todas las operaciones filtradas por tenant_id (obligatorio)
-```
-_________
-🤖 Qué hace Windsurf
+Listar citas por fecha
 
-Crea:
+Crear cita
 
-modelos SQLAlchemy con tenant_id
+Confirmar cita
 
-schemas Pydantic
+Cancelar cita
 
-router del módulo
+⚠️ Todas filtradas por tenant_id
+⚠️ Importación absoluta
+⚠️ Crear primero models.py → schemas.py → router.py
+⚠️ En models: __table_args__ = {"extend_existing": True}
+⚠️ En schemas: Field(..., pattern="^(pending|confirmed|cancelled)$")
 
-Registra el router
+Qué hace Windsurf:
 
-Filtra todas las queries por tenant_id
+Modelos SQLAlchemy con tenant_id y extend_existing
 
-🎯 Módulo funcional
-________
-ACTO 5 – Resultado final
+Schemas Pydantic con pattern
 
-Tu repo ahora tiene:
-```text
+Router registrado
+
+Queries filtradas por tenant_id
+
+created_at / updated_at con func.now()
+
+🎯 Módulo funcional listo
+
+🧱 ACTO 5 – Resultado final del repo
+
 app/
 ├── main.py
 ├── core/
@@ -336,22 +305,69 @@ app/
 │   ├── schemas.py
 │   ├── service.py
 │   └── router.py
-```
-Ejectuas
-# para ejecutar el FastAPI
-```bash
+
+
+🚀 Cómo ejecutar FastAPI
+
+# 1. Crear y activar entorno virtual
 python3 -m venv venv
 source venv/bin/activate
+
+# 2. Instalar dependencias
 pip install -r requirements.txt
+
+# 3. Ejecutar servidor
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-Abres:
-
-/docs
-
-/health
-
-Todo vivo 🔥
 
 
+Abrir /docs y /health
+Hot reload funciona sin conflictos con SQLAlchemy, Pydantic v2 y JWT
 
+📦 requirements.txt recomendado
+
+fastapi>=0.107
+uvicorn[standard]>=0.23
+sqlalchemy[asyncio]>=2.0
+asyncpg>=0.27
+pydantic>=2.5
+python-dotenv>=1.0
+PyJWT>=2.8
+
+
+Mantener versiones mínimas para compatibilidad
+
+Instalar pre-commit hooks opcionales: black, isort, flake8, bandit
+
+⚡ Tips importantes
+
+Multi-tenant obligatorio: todas queries filtradas por tenant_id
+
+Hot reload: usar __table_args__ = {"extend_existing": True} en todos los modelos
+
+Metadata global SQLAlchemy para evitar conflictos
+
+Pydantic v2: Field(..., pattern="...") en lugar de regex
+
+Pydantic Settings: extra = "ignore", validate_assignment = True
+
+JWT: expiración corta, roles SaaS, instalar PyJWT
+
+Logs seguros: tenant_id y request_id; nunca tokens completos
+
+Imports circulares: romper ciclo router → service → models usando imports locales
+
+Auditoría: todos los modelos con created_at / updated_at
+
+Roles SaaS: owner, admin, staff
+
+Código async y tipado
+
+Observabilidad: medir latencia DB y HTTP en /health
+
+Pre-commit hooks para calidad y seguridad
+
+✅ Este manual ahora es definitivo, actualizado e impecable, listo para:
+
+Subir a GitHub
+
+Ejecutar sin errores de SQLAlchemy hot reload, Pydantic v2, JWT, multi-tenant, Settings, logging seguro
