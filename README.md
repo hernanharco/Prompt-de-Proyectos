@@ -117,19 +117,43 @@ STACK
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 MULTI-TENANCY (CRÍTICO)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- Todas las tablas heredan de una base con tenant_id obligatorio
-- Toda query debe filtrar por tenant_id
-- El tenant_id se obtiene del contexto de request
-- Está prohibido ejecutar queries sin aislamiento de tenant
+- Todas las tablas heredan de una base con tenant_id obligatorio.
+- Toda query debe filtrar por tenant_id.
+- tenant_id se obtiene del contexto de request.
+- Está prohibido ejecutar queries sin aislamiento de tenant.
+- Middleware tenant:
+  - Extrae tenant del token o headers.
+  - Coloca tenant_id en request.state.tenant_id.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 DB & SSL (NEON)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- create_async_engine con:
-  - ssl.create_default_context()
-  - check_hostname = False
-  - verify_mode = ssl.CERT_NONE
+-Crear engine con create_async_engine usando:
 
+connect_args={"ssl": ssl_context}
+
+
+ssl_context con:
+
+ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
+
+
+La URL de conexión se carga desde .env (DATABASE_URL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COOKIES & CONFIG via .env
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+.env define:
+
+COOKIE_SECURE=false
+COOKIE_SAMESITE=lax
+DATABASE_URL=...
+PORT=8000
+CORS_ORIGINS=http://localhost:3000,https://vercel.app
+
+
+El backend debe leer estas variables automáticamente y aplicarlas.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SEGURIDAD & CORS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -140,10 +164,15 @@ SEGURIDAD & CORS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 OBSERVABILIDAD
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- Endpoint GET /health:
-  - SELECT 1
-  - medir latencia DB
+- Endpoint GET /health
+
+  - Ejecuta SELECT 1
+
+   - Mide latencia DB
+
 - Logging básico con tenant_id por request
+
+- Mostrar al iniciar: URL docs + URL health
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 REGLAS GENERALES
@@ -173,13 +202,10 @@ Output:
 - Lógica necesaria
 - Actualización de app/db/models.py
 - Actualización de app/db/router.py
+- Filtro tenant obligatorio en todas las queries
 
 No inventes infraestructura nueva.
 No omitas el filtro tenant_id.
-
-
-Genera el prompt de scaffolding definitivo para crear el backend en Windsurf.
-No generes código todavía.
 
 Usa OVERLAY – SaaS B2B (Base)
 
@@ -195,12 +221,17 @@ Usa OVERLAY – SaaS B2B (Base)
 - El diseño debe ser compatible con billing futuro
 - No asumir lógica enterprise innecesaria
 
-Usa este contrato de dominio ya validado:
-[PEGAS EL OUTPUT DEL ACTO 1]
-
 Genera el prompt de scaffolding definitivo para crear el backend en Windsurf.
 No generes código todavía.
 ```
+Extra:
+
+Cuando se arranca con:
+
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+
+Debe mostrar la dirección IP de la app, URL de /docs y /health.
 _____
 
 ## ⚙️ ACTO 3 – Windsurf
