@@ -28,3 +28,5 @@ src/components/[Nombre].tsx (La piel).
 src/app/page.tsx (El contenedor).
 
 Nota para Junior: Explica brevemente el "contrato" (las props/retornos) que creaste entre el Hook y el Componente para que entienda cómo se pasan la información.
+
+a partir de la imagen y el texto generar un nuevo prompt para pasarselo a windsurf
