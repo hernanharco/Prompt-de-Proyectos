@@ -145,7 +145,7 @@ class OAuth2PasswordBearerWithCookie(OAuth2PasswordBearer):
 ```
 Ruta: /backend-authCore/app/core/security.py > get_current_user()
 
-``python
+```python
 # Líneas 81-109
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     # 1. Decodificar JWT
@@ -160,15 +160,19 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 ## 7. Ejemplo: Acceso a Dashboard Protegido
 Ruta: /backend-authCore/app/api/v1/endpoints/users.py > read_user_me()
 
-python
+```python
 # Líneas 94-98
 @router.get("/me", response_model=UserResponse)
 async def read_user_me(current_user: User = Depends(get_current_active_user)):
     return current_user
-Flujo de Seguridad por Defecto
-Cookie httpOnly: JavaScript del cliente nunca puede acceder al token JWT
-Credentials: include: El navegador automáticamente incluye la cookie en cada petición
-OAuth2PasswordBearerWithCookie: Extrae token de cookie primero, luego de header
-LocalStorage híbrido: Solo guarda datos públicos (nombre, email), no el token
-Redirección hard refresh: Asegura que la cookie se establezca correctamente antes de navegar
+```
+__________
+## Flujo de Seguridad por Defecto
+_________
+1. Cookie httpOnly: JavaScript del cliente nunca puede acceder al token JWT
+2. Credentials: include: El navegador automáticamente incluye la cookie en cada petición
+3. OAuth2PasswordBearerWithCookie: Extrae token de cookie primero, luego de header
+4. LocalStorage híbrido: Solo guarda datos públicos (nombre, email), no el token
+5. Redirección hard refresh: Asegura que la cookie se establezca correctamente antes de navegar
+   
 Este diseño cumple con tu principio de "Seguridad por Defecto" manteniendo el token JWT completamente inaccesible para el JavaScript del cliente mientras permite una experiencia de usuario fluida.
