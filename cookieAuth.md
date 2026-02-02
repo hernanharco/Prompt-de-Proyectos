@@ -2,7 +2,7 @@
 
 Basado en el análisis detallado de tu código, aquí está el flujo completo de autenticación con Google enfocado en el manejo de cookies httpOnly:
 
-1. Trigger: Click en Botón de Login con Google
+## 1. Trigger: Click en Botón de Login con Google
 Ruta: /frontend-authCore/src/components/AuthView.tsx > AuthView > loginGoogle()
 
 ```typescript
@@ -17,15 +17,16 @@ const loginGoogle = useGoogleLogin({
 
 Ruta: /frontend-authCore/src/components/AuthView.tsx > AuthView > renderLoginForm() > onClick
 
-typescript
+```typescript
 // Líneas 123-148
 <button onClick={() => loginGoogle()}>
   Continuar con Google
 </button>
-2. Proxy de Red: Next.js hacia Backend
+```
+## 2. Proxy de Red: Next.js hacia Backend
 Ruta: /frontend-authCore/src/hooks/useAuth.ts > useAuth > loginWithGoogle()
 
-typescript
+```typescript
 // Líneas 100-134
 const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.auth.google}`, {
   method: 'POST',
@@ -33,17 +34,21 @@ const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.auth.g
   body: JSON.stringify({ token: code }),
   credentials: 'include', // ¡CLAVE! Esto permite que las cookies viajen
 });
+```
+
 Ruta: /frontend-authCore/src/config/api.ts > API_CONFIG
 
-typescript
+```typescript
 // Líneas 4-10
 baseUrl: process.env.NEXT_PUBLIC_API_URL || '/backend',
 endpoints: {
   google: '/api/v1/auth/google',
 }
+```
+
 Ruta: /frontend-authCore/next.config.ts > nextConfig > rewrites()
 
-typescript
+```typescript
 // Líneas 4-11
 async rewrites() {
   return [
@@ -53,10 +58,12 @@ async rewrites() {
     },
   ];
 }
-3. Backend Auth: Validación y JWT Generation
+```
+
+## 3. Backend Auth: Validación y JWT Generation
 Ruta: /backend-authCore/app/api/v1/endpoints/auth.py > google_login()
 
-python
+```python
 # Líneas 82-158
 @router.post("/google", response_model=UserLoginResponse)
 async def google_login(response: Response, *, db: Session = Depends(get_db), data: GoogleLogin):
@@ -73,10 +80,12 @@ async def google_login(response: Response, *, db: Session = Depends(get_db), dat
     
     # 4. Setear cookie httpOnly
     set_auth_cookie(response, access_token)
-4. Set-Cookie: Función Crítica de Seguridad
+```
+
+## 4. Set-Cookie: Función Crítica de Seguridad
 Ruta: /backend-authCore/app/api/v1/endpoints/auth.py > set_auth_cookie()
 
-python
+```python
 # Líneas 30-47
 def set_auth_cookie(response: Response, access_token: str):
     is_prod = settings.ENVIRONMENT == "production"
@@ -90,10 +99,12 @@ def set_auth_cookie(response: Response, access_token: str):
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         path="/",
     )
-5. Handshake de Regreso: Estrategia Híbrida
+```
+
+## 5. Handshake de Regreso: Estrategia Híbrida
 Ruta: /frontend-authCore/src/hooks/useAuth.ts > useAuth > setUser()
 
-typescript
+```typescript
 // Líneas 37-44
 const setUser = useCallback((user: User | null) => {
   setState(prev => ({ ...prev, user }));
@@ -103,9 +114,10 @@ const setUser = useCallback((user: User | null) => {
     localStorage.removeItem('auth_user');
   }
 }, []);
+```
 Ruta: /frontend-authCore/src/hooks/useAuth.ts > useAuth > loginWithGoogle()
 
-typescript
+```typescript
 // Líneas 119-125
 setUser(successData.user);  // Guarda datos públicos en localStorage
 setSuccess('Conectado con Google con éxito');
@@ -113,10 +125,12 @@ setSuccess('Conectado con Google con éxito');
 if (typeof window !== 'undefined') {
   window.location.href = '/dashboard';  // Redirección hard refresh
 }
-6. Middleware de Acceso: Validación de Cookies
+```
+
+## 6. Middleware de Acceso: Validación de Cookies
 Ruta: /backend-authCore/app/core/security.py > OAuth2PasswordBearerWithCookie > __call__()
 
-python
+```python
 # Líneas 19-33
 class OAuth2PasswordBearerWithCookie(OAuth2PasswordBearer):
     async def __call__(self, request: Request) -> Optional[str]:
@@ -128,9 +142,10 @@ class OAuth2PasswordBearerWithCookie(OAuth2PasswordBearer):
             token = await super().__call__(request)
             
         return token
+```
 Ruta: /backend-authCore/app/core/security.py > get_current_user()
 
-python
+``python
 # Líneas 81-109
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     # 1. Decodificar JWT
@@ -140,7 +155,9 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     # 2. Validar en BD
     user = db.query(User).filter(User.id == user_id).first()
     return user
-7. Ejemplo: Acceso a Dashboard Protegido
+```
+
+## 7. Ejemplo: Acceso a Dashboard Protegido
 Ruta: /backend-authCore/app/api/v1/endpoints/users.py > read_user_me()
 
 python
