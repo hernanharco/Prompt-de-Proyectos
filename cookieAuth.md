@@ -86,7 +86,7 @@ async def google_login(response: Response, *, db: Session = Depends(get_db), dat
     # 2. Crear o encontrar usuario
     user = db.query(User).filter(User.email == email).first()
     
-    # 3. Generar JWT propio
+    # 3. Generar JWT propio - aqui se utiliza la firma
     access_token = create_access_token(subject=user.id)
     
     # 4. Setear cookie httpOnly
