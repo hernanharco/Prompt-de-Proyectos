@@ -3,7 +3,12 @@
 Basado en el análisis detallado de tu código, aquí está el flujo completo de autenticación con Google enfocado en el manejo de cookies httpOnly:
 
 ## 1. Trigger: Click en Botón de Login con Google
-Ruta: /frontend-authCore/src/components/AuthView.tsx > AuthView > loginGoogle()
+
+- El flujo inicia cuando el usuario interactúa con la interfaz de autenticación.
+
+- Ruta: /frontend-authCore/src/components/AuthView.tsx
+
+Función: loginGoogle()
 
 ```typescript
 // Líneas 13-25
@@ -24,6 +29,9 @@ Ruta: /frontend-authCore/src/components/AuthView.tsx > AuthView > renderLoginFor
 </button>
 ```
 ## 2. Proxy de Red: Next.js hacia Backend
+
+La petición se envía al proxy interno de Next.js para evitar problemas de CORS y ocultar la URL real del backend.
+
 Ruta: /frontend-authCore/src/hooks/useAuth.ts > useAuth > loginWithGoogle()
 
 ```typescript
@@ -61,6 +69,9 @@ async rewrites() {
 ```
 
 ## 3. Backend Auth: Validación y JWT Generation
+
+El backend recibe el código de Google, valida la identidad y genera un token de acceso propio.
+
 Ruta: /backend-authCore/app/api/v1/endpoints/auth.py > google_login()
 
 ```python
@@ -88,20 +99,20 @@ Ruta: /backend-authCore/app/api/v1/endpoints/auth.py > set_auth_cookie()
 ```python
 # Líneas 30-47
 def set_auth_cookie(response: Response, access_token: str):
-    is_prod = settings.ENVIRONMENT == "production"
-    
     response.set_cookie(
         key="access_token",
         value=access_token,
-        httponly=True,           # ¡JavaScript NO puede acceder!
-        secure=is_prod,          # HTTPS en producción
-        samesite="lax" if not is_prod else "none",
-        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        httponly=True,           # Evita ataques XSS (JS no puede leerlo)
+        secure=settings.ENVIRONMENT == "production", # Solo HTTPS en prod
+        samesite="lax" if settings.ENVIRONMENT != "production" else "none",
         path="/",
     )
 ```
 
 ## 5. Handshake de Regreso: Estrategia Híbrida
+
+El frontend guarda datos públicos para la UI, mientras el navegador guarda el token secreto.
+
 Ruta: /frontend-authCore/src/hooks/useAuth.ts > useAuth > setUser()
 
 ```typescript
