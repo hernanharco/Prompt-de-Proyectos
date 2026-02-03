@@ -4,24 +4,29 @@ Copia y guarda este prompt. Está diseñado para que cualquier IA genere código
 Prompt sugerido: 
 
 ```text
-"Actúa como un desarrollador experto en FastAPI y SQLAlchemy. Analiza el siguiente HTML de
-una interfaz y genera la infraestructura de backend siguiendo una arquitectura modular.
+"Actúa como un desarrollador experto en FastAPI y SQLAlchemy. Analiza la lógica de la interfaz proporcionada y genera exclusivamente la infraestructura de backend siguiendo una arquitectura modular.
 
-Entregables:
+Entregables por cada dominio (services y business_hours):
 
-Model (SQLAlchemy): En app/models/[dominio].py. Usa la clase Base de app.models.base.
+Model (SQLAlchemy): En app/models/[dominio].py. Usa la clase Base de app.models.base. Para horarios, implementa una relación para manejar múltiples slots de tiempo (turno partido).
 
 Schemas (Pydantic): En app/schemas/[dominio].py. Crea esquemas para Crear, Leer y Actualizar.
 
 API Router: En app/api/v1/endpoints/[dominio].py.
 
+Infraestructura de Despliegue: * Crea un Dockerfile optimizado para FastAPI.
+
+Crea un setup.sh que reconozca entornos. Ejemplo: ./setup.sh production para configurar producción y ./setup.sh development para desarrollo.
+
 Reglas Técnicas:
 
-Usa rutas absolutas (ej: from app.db.session import get_db).
+Gestión de paquetes: Usa siempre pnpm para ejecutar scripts o tareas relacionadas.
 
-Implementa seguridad (ej: password debe ser un string que luego se hashee).
+Rutas: Usa rutas absolutas (ej: from app.db.session import get_db).
 
-El código debe ser limpio y estar comentado para un desarrollador Junior.
+Seguridad: Implementa validaciones robustas y manejo de tipos.
 
-HTML a analizar: [PEGA TU HTML AQUÍ]"
+Didáctica: El código debe ser limpio y estar comentado paso a paso para un desarrollador Junior, explicando la lógica de la base de datos y los endpoints.
+
+Lógica de la Interfaz a analizar (Referencia de datos): [PEGA AQUÍ EL CÓDIGO REACT/HTML QUE ME PASASTE]"
 ```
